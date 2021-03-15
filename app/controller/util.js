@@ -1,24 +1,22 @@
-'use strict';
 const svgCaptcha = require('svg-captcha');
-const Controller = require('egg').Controller;
-
-class UtilController extends Controller {
-    async captcha() {
-        const captcha = svgCaptcha.create({
-            size: 4,
-            fontSize: 50,
-            ignoreChars: 'Ooli',
-            width: 100,
-            height: 40,
-            noise: 3,
-            color: true,
-            background: '#cc9966',
-        });
-        // this.req.session.captcha = cap.text
-        this.ctx.session.captcha = captcha.text;
-        this.ctx.response.type = 'image/svg+xml';
-        this.ctx.body = captcha.data;
+// 获取图片验证码
+module.exports.getcode = (ctx) => {
+    const options = { // 参数
+        width: 100,
+        height: 40, // height of captcha
+        fontSize: 50, // captcha text size
+        color: true,
+        noise: 2,
     }
-}
-
-module.exports = UtilController;
+    const Captcha = svgCaptcha.createMathExpr(options); //生成验证码
+    ctx.session.codes = Captcha.text //把验证码保存到session
+    console.log('=============================================================')
+    console.log(ctx.session.codes)
+        // 设置session过期时间
+    ctx.session.maxAge = 1000 * 60 * 10
+    ctx.body = { //返回结果给客户端
+        status: 0,
+        message: 'success',
+        data: Captcha.data
+    }
+};
